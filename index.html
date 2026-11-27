@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The $20,000 Dilemma | Hong Kong Newborn Bonus Story</title>
+  <meta name="description" content="Two years after Hong Kong’s HK$20,000 Newborn Baby Bonus, why does the ultra-low birth rate persist? Data-driven multimedia investigation." />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e8eef7;
+      --muted: #94a3b8;
+      --accent: #f59e0b;
+      --accent2: #3b82f6;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --border: #334155;
+      --font: "Inter", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: var(--accent2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(15,20,25,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 1.25rem; font-size: 0.85rem; }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      min-height: 92vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 6rem 1.5rem 4rem;
+      max-width: 1100px; margin: 0 auto;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(245,158,11,0.15);
+      color: var(--accent);
+      font-size: 0.75rem; font-weight: 600;
+      padding: 0.35rem 0.75rem; border-radius: 999px;
+      margin-bottom: 1.25rem; letter-spacing: 0.04em;
+    }
+    .hero h1 {
+      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      font-weight: 800; line-height: 1.15;
+      letter-spacing: -0.03em; margin-bottom: 1.25rem;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero-lead {
+      font-size: 1.15rem; color: var(--muted);
+      max-width: 640px; margin-bottom: 2rem;
+    }
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem; margin-top: 1.5rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.1rem 1.25rem;
+    }
+    .stat-card .label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-card .value { font-size: 1.6rem; font-weight: 700; margin-top: 0.25rem; }
+    .stat-card .sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
+
+    /* Sections */
+    section {
+      padding: 4.5rem 1.5rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .section-label {
+      font-size: 0.75rem; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 700; letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .section-intro { color: var(--muted); max-width: 680px; margin-bottom: 2rem; }
+
+    /* Chart container */
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .chart-wrap canvas { max-height: 380px; }
+
+    /* Barrier cards */
+    .barriers {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem; margin-top: 1.5rem;
+    }
+    .barrier-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .barrier-card:hover { border-color: var(--accent); }
+    .barrier-card .icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+    .barrier-card h3 { font-size: 1.05rem; margin-bottom: 0.5rem; }
+    .barrier-card p { font-size: 0.9rem; color: var(--muted); }
+
+    /* Interactive tracker */
+    .tracker {
+      background: linear-gradient(145deg, var(--surface), var(--surface2));
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 2rem;
+      margin-top: 1.5rem;
+    }
+    .tracker-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 700px) { .tracker-grid { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+      display: block; font-size: 0.8rem; color: var(--muted);
+      margin-bottom: 0.35rem; font-weight: 500;
+    }
+    select, input[type="range"] {
+      width: 100%; background: var(--bg);
+      border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 0.95rem;
+    }
+    input[type="range"] { padding: 0; height: 6px; accent-color: var(--accent); }
+    .range-value { font-size: 0.85rem; color: var(--accent); margin-top: 0.25rem; }
+    .result-box {
+      background: var(--bg);
+      border-radius: 12px; padding: 1.5rem;
+      text-align: center;
+    }
+    .result-box .big {
+      font-size: 2.4rem; font-weight: 800; color: var(--accent);
+      line-height: 1.1;
+    }
+    .result-box .desc { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+    .breakdown { margin-top: 1.25rem; text-align: left; font-size: 0.85rem; }
+    .breakdown-row {
+      display: flex; justify-content: space-between;
+      padding: 0.4rem 0; border-bottom: 1px solid var(--border);
+    }
+
+    /* Act flow */
+    .acts { display: flex; flex-direction: column; gap: 2.5rem; }
+    .act {
+      display: grid; grid-template-columns: 80px 1fr;
+      gap: 1.25rem; align-items: start;
+    }
+    .act-num {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--surface2); border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: var(--accent); font-size: 1.1rem;
+    }
+    .act h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
+    .act p { color: var(--muted); font-size: 0.95rem; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 1.5rem; text-align: center;
+      color: var(--muted); font-size: 0.85rem;
+    }
+    footer .course { margin-top: 0.75rem; font-size: 0.8rem; }
+
+    /* Utility */
+    .highlight { color: var(--accent); font-weight: 600; }
+    .muted { color: var(--muted); }
+    .mt-2 { margin-top: 1.5rem; }
+    .data-note {
+      font-size: 0.75rem; color: var(--muted);
+      margin-top: 0.75rem; line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-brand">The $20,000 Dilemma</div>
+    <div class="nav-links">
+      <a href="#audit">Policy Audit</a>
+      <a href="#barriers">Barriers</a>
+      <a href="#tracker">Budget Tracker</a>
+      <a href="#story">Story Arc</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-badge">COM4510 · Multimedia Storytelling Project</div>
+    <h1>The <span>$20,000</span> Dilemma</h1>
+    <p class="hero-lead">
+      Two years after Hong Kong launched the Newborn Baby Bonus, the government has paid out over
+      <strong>HK$1.6 billion</strong>. Yet the total fertility rate remains among the world’s lowest.
+      Why hasn’t cash changed minds?
+    </p>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="label">TFR 2025</div>
+        <div class="value">0.73</div>
+        <div class="sub">births per woman</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Live births 2025</div>
+        <div class="value">31.1k</div>
+        <div class="sub">lowest on record</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Bonus paid out</div>
+        <div class="value">$1.62B</div>
+        <div class="sub">~81,000 families</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Replacement level</div>
+        <div class="value">2.1</div>
+        <div class="sub">needed for stability</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- POLICY AUDIT -->
+  <section id="audit">
+    <div class="section-label">Act 2 · The Two-Year Policy Audit</div>
+    <h2>Billions spent. Births still falling.</h2>
+    <p class="section-intro">
+      The Newborn Baby Bonus began on 25 October 2023. Official figures show tens of thousands of claims
+      settled, yet the long-term fertility trajectory has not reversed. The chart below compares annual
+      live births with the scale of public spending on the cash incentive.
+    </p>
+
+    <div class="chart-wrap">
+      <canvas id="birthsChart"></canvas>
+      <p class="data-note">
+        Sources: Census and Statistics Department (Table 115-01011), Labour and Welfare Bureau / LegCo
+        papers. Bonus disbursement is cumulative and estimated for charting purposes; 2023 partial year
+        (Oct–Dec). 2026 figures are year-to-date / projected from official updates as of Oct 2026.
+      </p>
+    </div>
+
+    <div class="hero-stats mt-2">
+      <div class="stat-card">
+        <div class="label">2024 births</div>
+        <div class="value">36.7k</div>
+        <div class="sub">+10.5% vs 2023</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">2025 births</div>
+        <div class="value">31.1k</div>
+        <div class="sub">−15.4% vs 2024</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Applications (Oct 2026)</div>
+        <div class="value">82.2k</div>
+        <div class="sub">eligible claims</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Disbursed</div>
+        <div class="value">$1.62B</div>
+        <div class="sub">public funds</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRUCTURAL BARRIERS -->
+  <section id="barriers">
+    <div class="section-label">Act 3 · Structural Barriers</div>
+    <h2>Why $20,000 is not enough</h2>
+    <p class="section-intro">
+      Academic and journalistic evidence points to deeper constraints that a one-off cash grant cannot
+      overcome: housing, childcare, workplace culture, and intensive parenting norms.
+    </p>
+
+    <div class="barriers">
+      <div class="barrier-card">
+        <div class="icon">🏠</div>
+        <h3>Housing & living space</h3>
+        <p>
+          Many couples live in 250–300 sq ft nano-flats or subdivided units. Adding a crib, stroller
+          and basic baby gear is physically difficult. Moving to a two-bedroom can cost an extra
+          HK$5,000–12,000 per month — the entire bonus disappears in 2–4 months of rent uplift.
+        </p>
+      </div>
+      <div class="barrier-card">
+        <div class="icon">👶</div>
+        <h3>Childcare shortages</h3>
+        <p>
+          Subsidised places for infants (0–2) remain limited. Waiting times of 12–18 months are
+          common. Private nurseries can cost around HK$10,000/month. Hiring a foreign domestic
+          helper requires extra space and cost that many households cannot absorb.
+        </p>
+      </div>
+      <div class="barrier-card">
+        <div class="icon">💼</div>
+        <h3>Motherhood penalty & overtime</h3>
+        <p>
+          Statutory maternity leave is 14 weeks. Persistent overtime culture and limited flexible
+          work push many professional women to pause or exit careers. Cash does not offset the
+          long-term earnings and status loss.
+        </p>
+      </div>
+      <div class="barrier-card">
+        <div class="icon">📚</div>
+        <h3>Intensive parenting norms</h3>
+        <p>
+          From playgroups to elite kindergarten interviews and private tuition, the expected
+          investment in a child’s early years is high. The “Second Demographic Transition”
+          values of self-fulfilment further delay or deter childbearing.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE TRACKER -->
+  <section id="tracker">
+    <div class="section-label">Act 4 · The $20,000 Countdown Tracker</div>
+    <h2>How long does the bonus last in your situation?</h2>
+    <p class="section-intro">
+      Adjust the assumptions below to see how quickly the one-off HK$20,000 grant is absorbed by
+      typical first-year baby costs in Hong Kong.
+    </p>
+
+    <div class="tracker">
+      <div class="tracker-grid">
+        <div>
+          <div class="form-group">
+            <label>Housing situation</label>
+            <select id="housing">
+              <option value="0">Already have suitable space (no extra rent)</option>
+              <option value="4000">Need larger flat (+HK$4,000/mo)</option>
+              <option value="7000" selected>Need larger flat (+HK$7,000/mo)</option>
+              <option value="10000">Need larger flat (+HK$10,000/mo)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Childcare / helper</label>
+            <select id="childcare">
+              <option value="0">Family care / no paid care</option>
+              <option value="3500">Part-time / playgroup (~HK$3,500/mo)</option>
+              <option value="8000" selected>Private nursery / helper share (~HK$8,000/mo)</option>
+              <option value="12000">Full private nursery + helper (~HK$12,000/mo)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Monthly formula, diapers & essentials</label>
+            <input type="range" id="essentials" min="1500" max="4500" step="100" value="2800" />
+            <div class="range-value">HK$<span id="essentialsVal">2,800</span> / month</div>
+          </div>
+          <div class="form-group">
+            <label>One-off setup (crib, stroller, gear)</label>
+            <input type="range" id="setup" min="3000" max="15000" step="500" value="8000" />
+            <div class="range-value">HK$<span id="setupVal">8,000</span></div>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="muted" style="font-size:0.8rem;margin-bottom:0.5rem;">Estimated months until $20,000 is gone</div>
+          <div class="big" id="monthsLeft">—</div>
+          <div class="desc" id="resultDesc">Adjust the inputs</div>
+          <div class="breakdown" id="breakdown"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORY ARC -->
+  <section id="story">
+    <div class="section-label">Story Architecture</div>
+    <h2>Five-act scroll</h2>
+    <p class="section-intro">
+      The full multimedia piece follows a deliberate arc from lived experience to policy evaluation,
+      designed for a long-form digital storytelling platform (Shorthand / GitHub Pages).
+    </p>
+
+    <div class="acts">
+      <div class="act">
+        <div class="act-num">1</div>
+        <div>
+          <h3>The First 100 Days</h3>
+          <p>A family of three in a 300-square-foot Kowloon flat. Expense ledger: hospital delivery, formula, diapers, and how the HK$20,000 is spent within weeks.</p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-num">2</div>
+        <div>
+          <h3>The Two-Year Policy Audit</h3>
+          <p>Interactive dual-axis chart of government bonus expenditure against monthly/annual live births (2020–2026). No sustained demographic recovery.</p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-num">3</div>
+        <div>
+          <h3>Three Structural Barriers</h3>
+          <p>Small apartments, long public infant daycare waitlists, and the inflated cost of hyper-competitive early education.</p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-num">4</div>
+        <div>
+          <h3>The Interactive Budget Tracker</h3>
+          <p>Readers select housing type and childcare preferences and instantly see when the grant is exhausted — the tool you are using above.</p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-num">5</div>
+        <div>
+          <h3>Re-thinking population policy</h3>
+          <p>Closing voices from demographers and intentionally child-free couples: long-term support requires workplace and housing reform, not only short-term cash.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY QUESTIONS -->
+  <section>
+    <div class="section-label">Central Questions</div>
+    <h2>What this investigation asks</h2>
+    <div class="barriers" style="margin-top:1.5rem;">
+      <div class="barrier-card">
+        <h3>1. Additionality</h3>
+        <p>To what extent has the HK$20,000 incentive raised fertility rates rather than merely subsidising births that would have occurred anyway?</p>
+      </div>
+      <div class="barrier-card">
+        <h3>2. Purchasing power</h3>
+        <p>What can $20,000 actually buy against rental premiums, baby supplies and the first year of childcare in Hong Kong?</p>
+      </div>
+      <div class="barrier-card">
+        <h3>3. Structural weight</h3>
+        <p>How much do housing constraints, workplace penalties and intensive parenting norms outweigh a one-time cash transfer?</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      <strong>The $20,000 Dilemma</strong> — Multimedia storytelling proposal for COM4510
+      Generative AI for Multimedia Authoring, City University of Hong Kong.
+    </p>
+    <p class="course">
+      Instructor: Dr. Xinzhi Zhang · Semester A 2026/27 · Department of Media and Communication
+    </p>
+    <p style="margin-top:1.25rem;font-size:0.75rem;">
+      Data visualisations use publicly available figures from the Census and Statistics Department,
+      Labour and Welfare Bureau, and Legislative Council papers. Interactive calculator assumptions
+      are illustrative. This page is a prototype deliverable based on the project proposal.
+    </p>
+  </footer>
+
+  <script>
+    // ===== Births vs Bonus Chart =====
+    const ctx = document.getElementById('birthsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['2020', '2021', '2022', '2023', '2024', '2025', '2026*'],
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Live births (thousands)',
+            data: [43.0, 37.0, 32.5, 33.2, 36.7, 31.1, 30.0],
+            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1,
+            yAxisID: 'y'
+          },
+          {
+            type: 'line',
+            label: 'Bonus disbursed (HK$ hundred millions, cumulative)',
+            data: [null, null, null, 1.5, 8.0, 14.4, 16.2],
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.15)',
+            borderWidth: 3,
+            pointRadius: 5,
+            pointBackgroundColor: '#f59e0b',
+            tension: 0.25,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: { color: '#94a3b8', font: { size: 12 } }
+          },
+          tooltip: {
+            backgroundColor: '#1a2332',
+            titleColor: '#e8eef7',
+            bodyColor: '#94a3b8',
+            borderColor: '#334155',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#94a3b8' },
+            grid: { color: 'rgba(51,65,85,0.4)' }
+          },
+          y: {
+            type: 'linear',
+            position: 'left',
+            title: { display: true, text: 'Live births (thousands)', color: '#94a3b8' },
+            ticks: { color: '#94a3b8' },
+            grid: { color: 'rgba(51,65,85,0.4)' }
+          },
+          y1: {
+            type: 'linear',
+            position: 'right',
+            title: { display: true, text: 'Bonus cumulative (HK$ ×100M)', color: '#f59e0b' },
+            ticks: { color: '#f59e0b' },
+            grid: { drawOnChartArea: false }
+          }
+        }
+      }
+    });
+
+    // ===== Interactive Budget Tracker =====
+    const housing = document.getElementById('housing');
+    const childcare = document.getElementById('childcare');
+    const essentials = document.getElementById('essentials');
+    const setup = document.getElementById('setup');
+    const essentialsVal = document.getElementById('essentialsVal');
+    const setupVal = document.getElementById('setupVal');
+    const monthsLeft = document.getElementById('monthsLeft');
+    const resultDesc = document.getElementById('resultDesc');
+    const breakdown = document.getElementById('breakdown');
+
+    function fmt(n) {
+      return n.toLocaleString('en-HK');
+    }
+
+    function recalculate() {
+      const rentExtra = Number(housing.value);
+      const care = Number(childcare.value);
+      const ess = Number(essentials.value);
+      const oneOff = Number(setup.value);
+
+      essentialsVal.textContent = fmt(ess);
+      setupVal.textContent = fmt(oneOff);
+
+      const monthly = rentExtra + care + ess;
+      const remainingAfterSetup = 20000 - oneOff;
+      let months = remainingAfterSetup > 0 ? remainingAfterSetup / monthly : 0;
+      if (monthly <= 0) months = Infinity;
+
+      if (months === Infinity) {
+        monthsLeft.textContent = '∞';
+        resultDesc.textContent = 'No ongoing extra costs — bonus covers setup only';
+      } else if (months < 1) {
+        monthsLeft.textContent = '< 1';
+        resultDesc.textContent = 'The grant is exhausted within the first month';
+      } else {
+        monthsLeft.textContent = months.toFixed(1);
+        resultDesc.textContent = `≈ ${Math.round(months)} months of typical extra costs`;
+      }
+
+      breakdown.innerHTML = `
+        <div class="breakdown-row"><span>One-off setup</span><span>HK$${fmt(oneOff)}</span></div>
+        <div class="breakdown-row"><span>Extra rent / month</span><span>HK$${fmt(rentExtra)}</span></div>
+        <div class="breakdown-row"><span>Childcare / month</span><span>HK$${fmt(care)}</span></div>
+        <div class="breakdown-row"><span>Essentials / month</span><span>HK$${fmt(ess)}</span></div>
+        <div class="breakdown-row" style="font-weight:600;border:none;padding-top:0.6rem;">
+          <span>Total monthly burn</span><span>HK$${fmt(monthly)}</span>
+        </div>
+      `;
+    }
+
+    [housing, childcare, essentials, setup].forEach(el => {
+      el.addEventListener('input', recalculate);
+      el.addEventListener('change', recalculate);
+    });
+    recalculate();
+  </script>
+</body>
+</html>
